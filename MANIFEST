@@ -11,6 +11,8 @@ TODO
 t/01mbox.t
 t/02maildir.t
 t/03mh.t
+t/pod.t
+t/pod-coverage.t
 t/testmh/.mh_sequences
 t/testmh/1
 t/testmh/2

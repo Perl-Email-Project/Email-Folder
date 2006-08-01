@@ -77,6 +77,10 @@ Defaults to false.
 Seek to an offset when opening the mbox.  When used in combination with
 ->tell you may be able to resume reading, with a trailing wind.
 
+=item C<tell>
+
+This returns the current filehandle position in the mbox.
+
 =back
 
 =cut
