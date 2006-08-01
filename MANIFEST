@@ -6,8 +6,6 @@ lib/Email/Folder/Mbox.pm
 lib/Email/Folder/MH.pm
 lib/Email/Folder/Reader.pm
 MANIFEST
-META.yml
-Build.PL
 Makefile.PL
 TODO
 t/01mbox.t

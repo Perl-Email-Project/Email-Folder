@@ -1,14 +1,14 @@
+use ExtUtils::MakeMaker;
 use strict;
-use Module::Build;
+use warnings;
 
-Module::Build->new(
-    module_name => "Email::Folder",
-    license     => 'perl',
-    requires    => {
-        'Test::More' => 0,
-        'Email::Simple' => 0,
-        'Email::FolderType' => 0.6, # for Ezmlm
-    },
-    create_makefile_pl => 'traditional',
-   )
-  ->create_build_script;
+WriteMakefile(
+  NAME          => 'Email::Folder',
+  VERSION_FROM  => 'lib/Email/Folder.pm',
+  PREREQ_PM     => {
+    'Email::FolderType' => 0.6, # or Ezmlm
+    'Email::Simple' => 0,
+    'Test::More'    => '0.47',
+  },
+);
+
