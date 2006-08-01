@@ -5,7 +5,7 @@ use Email::Simple;
 use Email::FolderType qw/folder_type/;
 
 use vars qw($VERSION);
-$VERSION = "0.85";
+$VERSION = "0.851";
 
 =head1 NAME
 
