@@ -5,6 +5,7 @@ lib/Email/Folder/Maildir.pm
 lib/Email/Folder/Mbox.pm
 lib/Email/Folder/MH.pm
 lib/Email/Folder/Reader.pm
+README
 MANIFEST
 Makefile.PL
 TODO
