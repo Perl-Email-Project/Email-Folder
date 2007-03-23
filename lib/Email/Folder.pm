@@ -5,7 +5,7 @@ use Email::Simple;
 use Email::FolderType qw/folder_type/;
 
 use vars qw($VERSION);
-$VERSION = "0.852";
+$VERSION = "0.853";
 
 =head1 NAME
 
@@ -123,6 +123,12 @@ sub reader {
 
 __END__
 
+=head1 PERL EMAIL PROJECT
+
+This module is maintained by the Perl Email Project
+
+L<http://emailproject.perl.org/wiki/Email::Folder>
+
 =head1 AUTHORS
 
 Simon Wistow <simon@thegestalt.org>
@@ -137,13 +143,6 @@ Distributed under the same terms as Perl itself.
 
 This software is under no warranty and will probably ruin your life,
 kill your friends, burn your house and bring about the doobie brothers.
-
-=head1 SUPPORT
-
-This module is part of the Perl Email Project  - http://pep.kwiki.org/
-
-There is a mailing list at pep@perl.org (subscribe at pep-subscribe@perl.org)
-and an archive available at http://nntp.perl.org/group/pep.php
 
 =head1 SEE ALSO
 
