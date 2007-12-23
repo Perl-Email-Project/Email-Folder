@@ -3,7 +3,7 @@ my %boxes;
 BEGIN { %boxes = ( 't/testmbox'      => "\x0a",
                    't/testmbox.mac'  => "\x0d",
                    't/testmbox.dos'  => "\x0d\x0a" ) }
-use Test::More tests => 12 + 3 * keys %boxes;
+use Test::More tests => 17 + 3 * keys %boxes;
 use strict;
 
 use_ok("Email::Folder");
@@ -73,3 +73,27 @@ ok( $r = Email::Folder->new('t/mboxcl2', seek_to => $offset), "reopened");
 is( $r->next_message->header('Subject'), 'Re: Fifteenth anniversary of Perl.',
     'second message' );
 
+undef $r;
+
+$r = Email::Folder->new('t/mboxcl3');
+my @m = $r->messages;
+is @m, 2, 'there are two messages in the mbox mboxcl2';
+
+is(
+  $m[0]->header('X-Test'),
+  'Just a bwahaha',
+ 'one more line after Content-Length'
+);
+
+is(
+  $m[0]->header_names(),
+  11,
+  'with Content-Length all headers are in place'
+);
+
+is(
+  $m[1]->header('X-Test'),
+  'Just another bwahaha',
+  'one more line after Lines'
+);
+is( $m[1]->header_names(), 11, 'with Lines all headers are in place' );
