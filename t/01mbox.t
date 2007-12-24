@@ -1,39 +1,44 @@
 #!perl -w
-my %boxes;
-BEGIN { %boxes = ( 'testmbox'      => "\x0a",
-                   'testmbox.mac'  => "\x0d",
-                   'testmbox.dos'  => "\x0d\x0a" ) }
-use Test::More tests => 17 + 3 * keys %boxes;
 use strict;
+my %boxes;
+BEGIN {
+  %boxes = (
+    'testmbox'      => "\x0a",
+    'testmbox.mac'  => "\x0d",
+    'testmbox.dos'  => "\x0d\x0a"
+  )
+}
+
+use Test::More tests => 17 + 3 * keys %boxes;
 
 use_ok("Email::Folder");
 
 for my $box (keys %boxes) {
-    my $folder;
-    ok(
-      $folder = Email::Folder->new("t/mboxes/$box", eol => $boxes{$box}),
-      "opened $box"
-    );
+  my $folder;
+  ok(
+    $folder = Email::Folder->new("t/mboxes/$box", eol => $boxes{$box}),
+    "opened $box"
+  );
 
-    my @messages = $folder->messages;
-    is(@messages, 10, "grabbed 10 messages");
+  my @messages = $folder->messages;
+  is(@messages, 10, "grabbed 10 messages");
 
-    my @subjects = sort map { $_->header('Subject') }  @messages;
+  my @subjects = sort map { $_->header('Subject') }  @messages;
 
-    my @known = (
-                 'R: [p5ml] karie kahimi binge...help needed',
-                 'RE: [p5ml] Re: karie kahimi binge...help needed',
-                 'Re: January\'s meeting',
-                 'Re: January\'s meeting',
-                 'Re: January\'s meeting',
-                 'Re: [p5ml] karie kahimi binge...help needed',
-                 'Re: [p5ml] karie kahimi binge...help needed',
-                 'Re: [rt-users] Configuration Problem',
-                 '[p5ml] Re: karie kahimi binge...help needed',
-                 '[rt-users] Configuration Problem',
-                );
+  my @known = (
+    'R: [p5ml] karie kahimi binge...help needed',
+    'RE: [p5ml] Re: karie kahimi binge...help needed',
+    'Re: January\'s meeting',
+    'Re: January\'s meeting',
+    'Re: January\'s meeting',
+    'Re: [p5ml] karie kahimi binge...help needed',
+    'Re: [p5ml] karie kahimi binge...help needed',
+    'Re: [rt-users] Configuration Problem',
+    '[p5ml] Re: karie kahimi binge...help needed',
+    '[rt-users] Configuration Problem',
+  );
 
-    is_deeply(\@subjects, \@known, "they're the messages we expected");
+  is_deeply(\@subjects, \@known, "they're the messages we expected");
 }
 
 
