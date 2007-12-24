@@ -122,7 +122,7 @@ sub _get_fh {
     return $fh;
 }
 
-use constant debug => 1;
+use constant debug => 0;
 my $count;
 
 sub next_message {

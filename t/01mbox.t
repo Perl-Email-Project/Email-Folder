@@ -1,8 +1,8 @@
 #!perl -w
 my %boxes;
-BEGIN { %boxes = ( 't/testmbox'      => "\x0a",
-                   't/testmbox.mac'  => "\x0d",
-                   't/testmbox.dos'  => "\x0d\x0a" ) }
+BEGIN { %boxes = ( 'testmbox'      => "\x0a",
+                   'testmbox.mac'  => "\x0d",
+                   'testmbox.dos'  => "\x0d\x0a" ) }
 use Test::More tests => 17 + 3 * keys %boxes;
 use strict;
 
@@ -10,7 +10,10 @@ use_ok("Email::Folder");
 
 for my $box (keys %boxes) {
     my $folder;
-    ok($folder = Email::Folder->new($box, eol => $boxes{$box}), "opened $box");
+    ok(
+      $folder = Email::Folder->new("t/mboxes/$box", eol => $boxes{$box}),
+      "opened $box"
+    );
 
     my @messages = $folder->messages;
     is(@messages, 10, "grabbed 10 messages");
@@ -35,10 +38,10 @@ for my $box (keys %boxes) {
 
 
 my $folder;
-ok($folder = Email::Folder->new('t/testmbox.empty'), "opened testmbox.empty");
+ok($folder = Email::Folder->new('t/mboxes/testmbox.empty'), "opened testmbox.empty");
 is($folder->messages, 0);
 
-ok($folder = Email::Folder->new('t/mboxcl2'), "opened mboxcl2");
+ok($folder = Email::Folder->new('t/mboxes/mboxcl2'), "opened mboxcl2");
 my @messages = $folder->messages;
 
 is(@messages, 3);
@@ -50,7 +53,7 @@ is_deeply( [ sort map { $_->header('Subject') } @messages ],
            "they're the messages we expected");
 
 # mboxcl2 with a lying Content-Length header
-ok($folder = Email::Folder->new('t/mboxcl2.lies'), "opened mboxcl2.lies");
+ok($folder = Email::Folder->new('t/mboxes/mboxcl2.lies'), "opened mboxcl2.lies");
 @messages = $folder->messages;
 
 is(@messages, 3);
@@ -61,7 +64,7 @@ is_deeply( [ sort map { $_->header('Subject') } @messages ],
             ],
            "they're the messages we expected");
 
-my $r = Email::Folder->new('t/mboxcl2');
+my $r = Email::Folder->new('t/mboxes/mboxcl2');
 is( $r->next_message->header('Subject'), 'Fifteenth anniversary of Perl.',
     'iterate first message' );
 
@@ -69,13 +72,13 @@ is( $r->next_message->header('Subject'), 'Fifteenth anniversary of Perl.',
 my $offset = $r->reader->tell;
 undef $r;
 
-ok( $r = Email::Folder->new('t/mboxcl2', seek_to => $offset), "reopened");
+ok( $r = Email::Folder->new('t/mboxes/mboxcl2', seek_to => $offset), "reopened");
 is( $r->next_message->header('Subject'), 'Re: Fifteenth anniversary of Perl.',
     'second message' );
 
 undef $r;
 
-$r = Email::Folder->new('t/mboxcl3');
+$r = Email::Folder->new('t/mboxes/mboxcl3');
 my @m = $r->messages;
 is @m, 2, 'there are two messages in the mbox mboxcl2';
 
