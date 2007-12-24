@@ -136,20 +136,22 @@ sub next_message {
     my $inheaders = 1;
     ++$count;
     print "$count starting scanning at line $.\n" if debug;
-    local $_;
-    while (<$fh>) {
-        if ($_ eq $/ && $inheaders) { # end of headers
+
+    while (my $line = <$fh>) {
+        if ($line eq $/ && $inheaders) { # end of headers
             print "$count end of headers at line $.\n" if debug;
             $inheaders = 0; # stop looking for the end of headers
             my $pos = tell $fh; # where to go back to if it goes wrong
+
             # look for a content length header, and try to use that
             if ($mail =~ m/^Content-Length: (\d+)$/mi) {
+                $mail .= $prev;
                 my $length = $1;
                 print " Content-Length: $length\n" if debug;
                 my $read = '';
-                while (<$fh>) {
+                while (my $bodyline = <$fh>) {
                     last if length $read >= $length;
-                    $read .= $_;
+                    $read .= $bodyline;
                 }
                 # grab the next line (should be /^From / or undef)
                 my $next = <$fh>;
@@ -160,12 +162,14 @@ sub next_message {
                 print " Content-Length assertion failed '$next'\n" if debug;
                 seek $fh, $pos, 0;
             }
+
             # much the same, but with Lines:
             if ($mail =~ m/^Lines: (\d+)$/mi) {
+                $mail .= $prev;
                 my $lines = $1;
                 print " Lines: $lines\n" if debug;
                 my $read = '';
-                for (1..$lines) { $read .= <$fh> }
+                for (1 .. $lines) { $read .= <$fh> }
                 <$fh>; # trailing newline
                 my $next = <$fh>;
                 return "$mail$/$read"
@@ -176,25 +180,32 @@ sub next_message {
                 seek $fh, $pos, 0;
             }
         }
-        if (!$self->{jwz_From_}) {
-            # according to mutt:
-            #   A valid message separator looks like:
-            #   From [ <return-path> ] <weekday> <month> <day> <time> [ <timezone> ] <year>
-            last if $prev eq $/ && (
-                /^From \S+\s+(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)/ ||
-                /^From (?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)/
-                    );
-        }
-        else {
-            # though, as jwz rants, only this is reliable and portable
-            last if $prev eq $/ && /^From /;
-        }
+
+        last if $prev eq $/ && ($line =~ $self->_from_line_re);
+
         $mail .= $prev;
-        $prev = $_;
+        $prev = $line;
     }
     print "$count end of message line $.\n" if debug;
     return unless $mail;
     return $mail;
+}
+
+my @FROM_RE;
+BEGIN {
+  @FROM_RE = (
+    # according to mutt:
+    #   A valid message separator looks like:
+    #   From [ <return-path> ] <weekday> <month> <day> <time> [ <tz> ] <year>
+    qr/^From (?:\S+\s+)?(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)/,
+
+    # though, as jwz rants, only this is reliable and portable
+    qr/^From /,
+  );
+}
+
+sub _from_line_re {
+  return $FROM_RE[ $_[0]->{jwz_From_} ? 1 : 0 ];
 }
 
 sub tell {
