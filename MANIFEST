@@ -21,6 +21,7 @@ t/testmh/3
 t/testmh/4
 t/mboxcl2
 t/mboxcl2.lies
+t/mboxcl3
 t/testmbox
 t/testmbox.mac
 t/testmbox.dos
