@@ -50,8 +50,7 @@ If true we use
 
  /^From /
 
-In deference to this extract from L<Content-Length Considered
-Harmful|http://www.jwz.org/doc/content-length.html>
+In deference to this extract from L<http://www.jwz.org/doc/content-length.html>
 
  Essentially the only safe way to parse that file format is to
  consider all lines which begin with the characters ``From ''
