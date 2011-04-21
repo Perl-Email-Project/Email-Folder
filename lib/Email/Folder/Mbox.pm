@@ -118,6 +118,30 @@ sub _get_fh {
     my $file = shift;
     my $fh = IO::File->new($file) or croak "Cannot open $file";
     binmode($fh);
+
+    # Is this a gzipped file?
+    my $bytes;
+
+    if ( read $fh, $bytes, 2 ) {
+
+      ( my $magic = $bytes ) =~ s/(.)/sprintf '%x', ord( $1 )/eg;
+
+      if ( $magic eq '1f8b' ) { # it's a gzipped file
+
+        $fh->close;
+
+        require IO::Uncompress::Gunzip;
+        $fh = IO::Uncompress::Gunzip->new( $file )
+          or croak "Cannot open $file: $IO::Uncompress::GunzipError";
+
+      } else { # leave the pointer at the beginning of the file
+
+        $fh->seek( 0, 0 );
+      }
+    } else {
+      carp "Unable to detect type of file, filehandle is in an unknown state";
+    }
+
     return $fh;
 }
 
