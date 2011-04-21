@@ -4,6 +4,7 @@ my %boxes;
 BEGIN {
   %boxes = (
     'testmbox'      => "\x0a",
+    'testmbox.gz'   => "\x0a",
     'testmbox.mac'  => "\x0d",
     'testmbox.dos'  => "\x0d\x0a"
   )
