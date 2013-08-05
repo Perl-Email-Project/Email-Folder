@@ -143,6 +143,7 @@ sub next_message {
             # look for a content length header, and try to use that
             if ($mail =~ m/^Content-Length: (\d+)$/mi) {
                 $mail .= $prev;
+                $prev = '';
                 my $length = $1;
                 print " Content-Length: $length\n" if debug;
                 my $read = '';
@@ -163,6 +164,7 @@ sub next_message {
             # much the same, but with Lines:
             if ($mail =~ m/^Lines: (\d+)$/mi) {
                 $mail .= $prev;
+                $prev = '';
                 my $lines = $1;
                 print " Lines: $lines\n" if debug;
                 my $read = '';
