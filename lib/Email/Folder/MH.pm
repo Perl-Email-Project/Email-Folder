@@ -27,8 +27,12 @@ sub _what_is_there {
     my @messages;
                 opendir(DIR,"$dir") or croak "Could not open '$dir'";
                 foreach my $file (readdir DIR) {
+                    if ($^O eq 'VMS'){
+                        next unless $file =~ /\A\d+\.\Z/;
+                    } else {
                         next unless $file =~ /\A\d+\Z/;
-                                push @messages, "$dir/$file";
+                    }
+                    push @messages, "$dir/$file";
                 }
 
     $self->{_messages} = \@messages;
