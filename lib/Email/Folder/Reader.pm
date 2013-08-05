@@ -1,10 +1,8 @@
-package Email::Folder::Reader;
 use strict;
+use warnings;
+package Email::Folder::Reader;
+# ABSTRACT: reads raw RFC822 mails from a box
 use Carp;
-
-=head1 NAME
-
-Email::Folder::Reader - reads raw RFC822 mails from a box
 
 =head1 SYNOPSIS
 
@@ -22,7 +20,7 @@ or, as an iterator
 
 =head1 METHODS
 
-=head2 ->new($filename, %options)
+=head2 new($filename, %options)
 
 your standard class-method constructor
 
@@ -62,24 +60,3 @@ sub messages {
 }
 
 1;
-
-__END__
-
-=head1 AUTHOR
-
-Simon Wistow <simon@thegestalt.org>
-
-=head1 COPYING
-
-Copyright 2003, Simon Wistow
-
-Distributed under the same terms as Perl itself.
-
-This software is under no warranty and will probably ruin your life,
-kill your friends, burn your house and bring about the apocolapyse.
-
-=head1 SEE ALSO
-
-L<Email::LocalDelivery>, L<Email::Folder>
-
-=cut

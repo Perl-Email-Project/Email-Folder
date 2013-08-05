@@ -1,15 +1,10 @@
 use strict;
+use warnings;
+# ABSTRACT: read all the messages from a folder as Email::Simple objects
 package Email::Folder;
 use Carp;
 use Email::Simple;
-use Email::FolderType qw/folder_type/;
-
-use vars qw($VERSION);
-$VERSION = "0.855";
-
-=head1 NAME
-
-Email::Folder - read all the messages from a folder as Email::Simple objects.
+use Email::FolderType 0.6 qw/folder_type/;
 
 =head1 SYNOPSIS
 
@@ -120,29 +115,6 @@ sub reader {
 }
 
 1;
-
-__END__
-
-=head1 PERL EMAIL PROJECT
-
-This module is maintained by the Perl Email Project
-
-L<http://emailproject.perl.org/wiki/Email::Folder>
-
-=head1 AUTHORS
-
-Simon Wistow <simon@thegestalt.org>
-
-Richard Clamp <richardc@unixbeard.net>
-
-=head1 COPYING
-
-Copyright 2006, Simon Wistow
-
-Distributed under the same terms as Perl itself.
-
-This software is under no warranty and will probably ruin your life,
-kill your friends, burn your house and bring about the doobie brothers.
 
 =head1 SEE ALSO
 

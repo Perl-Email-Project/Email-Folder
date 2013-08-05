@@ -1,8 +1,0 @@
-\.svn
-~$
-\.tar\.gz$
-MANIFEST.SKIP
-_build
-blib
-^Email-Folder-
-Build

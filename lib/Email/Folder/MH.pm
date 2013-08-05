@@ -1,13 +1,11 @@
-package Email::Folder::MH;
 use strict;
+use warnings;
+package Email::Folder::MH;
+# ABSTRACT: reads raw RFC822 mails from an mh folder
 use Carp;
 use IO::File;
 use Email::Folder::Reader;
-use base 'Email::Folder::Reader';
-
-=head1 NAME
-
-Email::Folder::MH - reads raw RFC822 mails from an mh folder
+use parent 'Email::Folder::Reader';
 
 =head1 SYNOPSIS
 
@@ -47,23 +45,3 @@ sub next_message {
 }
 
 1;
-
-__END__
-
-=head1 AUTHOR
-
-Ricardo SIGNES <C<rjbs@cpan.org>>
-
-This code is just Simon Wistow's Email::Folder::Maildir adapted for C<mh>.
-
-=head1 COPYING
-
-Copyright 2004, Simon Wistow
-
-Distributed under the same terms as Perl itself.
-
-=head1 SEE ALSO
-
-L<Email::LocalDelivery>, L<Email::Folder>
-
-=cut

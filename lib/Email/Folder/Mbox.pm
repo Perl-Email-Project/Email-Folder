@@ -1,13 +1,11 @@
-package Email::Folder::Mbox;
 use strict;
+use warnings;
+package Email::Folder::Mbox;
+# ABSTRACT: reads raw RFC822 mails from an mbox file
 use Carp;
 use IO::File;
 use Email::Folder::Reader;
-use base 'Email::Folder::Reader';
-
-=head1 NAME
-
-Email::Folder::Mbox - reads raw RFC822 mails from an mbox file
+use parent 'Email::Folder::Reader';
 
 =head1 SYNOPSIS
 
@@ -52,22 +50,22 @@ If true we use
 
 In deference to this extract from L<http://www.jwz.org/doc/content-length.html>
 
- Essentially the only safe way to parse that file format is to
- consider all lines which begin with the characters ``From ''
- (From-space), which are preceded by a blank line or
- beginning-of-file, to be the division between messages.  That is, the
- delimiter is "\n\nFrom .*\n" except for the very first message in the
- file, where it is "^From .*\n".
+  Essentially the only safe way to parse that file format is to
+  consider all lines which begin with the characters ``From ''
+  (From-space), which are preceded by a blank line or
+  beginning-of-file, to be the division between messages.  That is, the
+  delimiter is "\n\nFrom .*\n" except for the very first message in the
+  file, where it is "^From .*\n".
 
- Some people will tell you that you should do stricter parsing on
- those lines: check for user names and dates and so on.  They are
- wrong.  The random crap that has traditionally been dumped into that
- line is without bound; comparing the first five characters is the
- only safe and portable thing to do. Usually, but not always, the next
- token on the line after ``From '' will be a user-id, or email
- address, or UUCP path, and usually the next thing on the line will be
- a date specification, in some format, and usually there's nothing
- after that.  But you can't rely on any of this.
+  Some people will tell you that you should do stricter parsing on
+  those lines: check for user names and dates and so on.  They are
+  wrong.  The random crap that has traditionally been dumped into that
+  line is without bound; comparing the first five characters is the
+  only safe and portable thing to do. Usually, but not always, the next
+  token on the line after ``From '' will be a user-id, or email
+  address, or UUCP path, and usually the next thing on the line will be
+  a date specification, in some format, and usually there's nothing
+  after that.  But you can't rely on any of this.
 
 Defaults to false.
 
@@ -213,26 +211,3 @@ sub tell {
 }
 
 1;
-
-__END__
-
-=head1 AUTHORS
-
-Simon Wistow <simon@thegestalt.org>
-
-Richard Clamp <richardc@unixbeard.net>
-
-=head1 COPYING
-
-Copyright 2003, Simon Wistow
-
-Distributed under the same terms as Perl itself.
-
-This software is under no warranty and will probably ruin your life,
-kill your friends, burn your house and bring about the apocolapyse.
-
-=head1 SEE ALSO
-
-L<Email::LocalDelivery>, L<Email::Folder>
-
-=cut

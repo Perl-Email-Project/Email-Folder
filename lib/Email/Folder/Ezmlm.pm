@@ -1,8 +1,10 @@
-package Email::Folder::Ezmlm;
 use strict;
+use warnings;
+package Email::Folder::Ezmlm;
+# ABSTRACT: reads raw RFC822 mails from an ezmlm archive
 use Carp;
 use Email::Folder::Maildir;
-use base 'Email::Folder::Maildir';
+use parent 'Email::Folder::Maildir';
 
 # we're a little complicit, just redefining an internal method, but
 # that's fine, we maintain both piles :)

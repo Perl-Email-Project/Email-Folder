@@ -1,13 +1,11 @@
-package Email::Folder::Maildir;
 use strict;
+use warnings;
+package Email::Folder::Maildir;
+# ABSTRACT: reads raw RFC822 mails from a maildir
 use Carp;
 use IO::File;
 use Email::Folder::Reader;
-use base 'Email::Folder::Reader';
-
-=head1 NAME
-
-Email::Folder::Maildir - reads raw RFC822 mails from a maildir
+use parent 'Email::Folder::Reader';
 
 =head1 SYNOPSIS
 
@@ -18,7 +16,8 @@ This isa Email::Folder::Reader - read about its API there.
 Does exactly what it says on the tin - fetches raw RFC822 mails from a
 maildir.
 
-The maildir format is described at http://www.qmail.org/man/man5/maildir.html
+The maildir format is described at
+L<http://www.qmail.org/man/man5/maildir.html>
 
 =cut
 
@@ -56,23 +55,3 @@ sub next_message {
 }
 
 1;
-
-__END__
-
-=head1 AUTHOR
-
-Simon Wistow <simon@thegestalt.org>
-
-=head1 COPYING
-
-Copyright 2003, Simon Wistow
-
-Distributed under the same terms as Perl itself.
-
-This software is under no warranty and will probably ruin your life, kill your friends, burn your house and brin$
-
-=head1 SEE ALSO
-
-L<Email::LocalDelivery>, L<Email::Folder>
-
-=cut
