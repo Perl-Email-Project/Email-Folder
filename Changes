@@ -1,6 +1,8 @@
 Revision history for Email-Folder
 
 {{$NEXT}}
+
+0.857     2013-08-05 18:16:44 America/New_York
           eliminate extra Pod tests
 
 0.856     2013-08-05 18:12:09 America/New_York
