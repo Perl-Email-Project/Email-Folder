@@ -82,7 +82,7 @@ sub next_message {
 
 Takes a raw RFC822 message and blesses it into a class.
 
-By default this is an Email::Simple object but can easily be overriden
+By default this is an Email::Simple object but can easily be overridden
 in a subclass.
 
 For example, this simple subclass just returns the raw rfc822 messages,
