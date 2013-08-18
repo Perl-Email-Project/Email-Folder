@@ -37,7 +37,7 @@ to specify C<eol =E<gt> "\x0d">
 =item C<jwz_From_>
 
 The value is taken as a boolean that governs what is used match as a
-message seperator.
+message separator.
 
 If false we use the mutt style
 
