@@ -2,6 +2,9 @@ Revision history for Email-Folder
 
 {{$NEXT}}
 
+0.858     2014-01-07 10:54:18-05:00 America/New_York
+          typo fixes in docs (thanks, Florian Schlichting)
+
 0.857     2013-08-05 18:16:44 America/New_York
           eliminate extra Pod tests
 
