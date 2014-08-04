@@ -28,6 +28,11 @@ The new constructor takes extra options.
 
 =over
 
+=item C<fh>
+
+When filename is set to C<"FH"> than Email::Folder::Mbox will read mbox
+archive from filehandle C<fh> instead from disk file C<filename>.
+
 =item C<eol>
 
 This indicates what the line-ending style is to be.  The default is
@@ -89,13 +94,16 @@ sub defaults {
 sub _open_it {
     my $self = shift;
     my $file = $self->{_file};
+    my $fh = $self->{fh};
 
-    # sanity checking
-    croak "$file does not exist" unless (-e $file);
-    croak "$file is not a file"  unless (-f $file);
+    unless ($file eq "FH" and $fh) {
+        # sanity checking
+        croak "$file does not exist" unless (-e $file);
+        croak "$file is not a file"  unless (-f $file);
 
-    local $/ = $self->{eol};
-    my $fh = $self->_get_fh($file);
+        local $/ = $self->{eol};
+        $fh = $self->_get_fh($file);
+    }
 
     if ($self->{seek_to}) {
         # we were told to seek.  hope it all goes well
