@@ -89,6 +89,14 @@ variant, so default value is false.
 Seek to an offset when opening the mbox.  When used in combination with
 ->tell you may be able to resume reading, with a trailing wind.
 
+=item <next_message>
+
+This returns next message as string
+
+=item <next_messageref>
+
+This returns next message as ref to string
+
 =item C<tell>
 
 This returns the current filehandle position in the mbox.
@@ -140,7 +148,7 @@ sub _get_fh {
 use constant debug => 0;
 my $count;
 
-sub next_message {
+sub next_messageref {
     my $self = shift;
 
     my $fh = $self->{_fh} || $self->_open_it;
@@ -173,7 +181,7 @@ sub next_message {
                 }
                 # grab the next line (should be /^From / or undef)
                 my $next = <$fh>;
-                return "$mail$/$read"
+                return \"$mail$/$read"
                   if !defined $next || $next =~ /^From /;
                 # seek back and scan line-by-line like the header
                 # wasn't here
@@ -196,7 +204,7 @@ sub next_message {
                 }
                 <$fh>; # trailing newline
                 my $next = <$fh>;
-                return "$mail$/$read"
+                return \"$mail$/$read"
                   if !defined $next || $next =~ /^From /;
                 # seek back and scan line-by-line like the header
                 # wasn't here
@@ -215,7 +223,14 @@ sub next_message {
     }
     print "$count end of message line $.\n" if debug;
     return unless $mail;
-    return $mail;
+    return \$mail;
+}
+
+sub next_message {
+    my $self = shift;
+    my $ref = $self->next_messageref;
+    return unless $ref;
+    return ${$ref};
 }
 
 my @FROM_RE;
