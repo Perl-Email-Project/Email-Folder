@@ -74,6 +74,16 @@ In deference to this extract from L<http://www.jwz.org/doc/content-length.html>
 
 Defaults to false.
 
+=item C<unescape>
+
+This boolean value indicates whenever lines which starts with
+
+ /^>+From /
+
+should be unescaped (= removed leading '>' char). This is needed for
+mboxrd and mboxcl variants. But there is no way to detect for used mbox
+variant, so default value is false.
+
 =item C<seek_to>
 
 Seek to an offset when opening the mbox.  When used in combination with
@@ -157,6 +167,8 @@ sub next_message {
                 my $read = '';
                 while (my $bodyline = <$fh>) {
                     last if length $read >= $length;
+                    # unescape From_
+                    $bodyline =~ s/^>(>*From )/$1/ if $self->{unescape};
                     $read .= $bodyline;
                 }
                 # grab the next line (should be /^From / or undef)
@@ -176,7 +188,12 @@ sub next_message {
                 my $lines = $1;
                 print " Lines: $lines\n" if debug;
                 my $read = '';
-                for (1 .. $lines) { $read .= <$fh> }
+                for (1 .. $lines) {
+                    my $bodyline = <$fh>;
+                    # unescape From_
+                    $bodyline =~ s/^>(>*From )/$1/ if $self->{unescape};
+                    $read .= $bodyline;
+                }
                 <$fh>; # trailing newline
                 my $next = <$fh>;
                 return "$mail$/$read"
@@ -192,6 +209,9 @@ sub next_message {
 
         $mail .= $prev;
         $prev = $line;
+
+        # unescape From_
+        $prev =~ s/^>(>*From )/$1/ if $self->{unescape};
     }
     print "$count end of message line $.\n" if debug;
     return unless $mail;
