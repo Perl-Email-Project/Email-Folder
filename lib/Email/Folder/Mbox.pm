@@ -101,6 +101,10 @@ This returns next message as ref to string
 
 This returns the current filehandle position in the mbox.
 
+=item C<next_from>
+
+This returns the From_ line for next message. Call it before ->next_message.
+
 =back
 
 =cut
@@ -132,6 +136,7 @@ sub _open_it {
         if ($firstline) {
             croak "$file is not an mbox file" unless $firstline =~ /^From /;
         }
+        $self->{from} = $firstline;
     }
 
     $self->{_fh} = $fh;
@@ -148,6 +153,12 @@ sub _get_fh {
 use constant debug => 0;
 my $count;
 
+sub next_from {
+    my $self = shift;
+    $self->_open_it unless $self->{_fh};
+    return $self->{from};
+}
+
 sub next_messageref {
     my $self = shift;
 
@@ -156,6 +167,7 @@ sub next_messageref {
 
     my $mail = '';
     my $prev = '';
+    my $last;
     my $inheaders = 1;
     ++$count;
     print "$count starting scanning at line $.\n" if debug;
@@ -181,8 +193,11 @@ sub next_messageref {
                 }
                 # grab the next line (should be /^From / or undef)
                 my $next = <$fh>;
-                return \"$mail$/$read"
-                  if !defined $next || $next =~ /^From /;
+                if (!defined $next || $next =~ /^From /) {
+                    $self->{from} = $next;
+                    $mail .= "$/$read";
+                    return \$mail;
+                }
                 # seek back and scan line-by-line like the header
                 # wasn't here
                 print " Content-Length assertion failed '$next'\n" if debug;
@@ -204,8 +219,11 @@ sub next_messageref {
                 }
                 <$fh>; # trailing newline
                 my $next = <$fh>;
-                return \"$mail$/$read"
-                  if !defined $next || $next =~ /^From /;
+                if (!defined $next || $next =~ /^From /) {
+                    $self->{from} = $next;
+                    $mail .= "$/$read";
+                    return \$mail;
+                }
                 # seek back and scan line-by-line like the header
                 # wasn't here
                 print " Lines assertion failed '$next'\n" if debug;
@@ -213,7 +231,11 @@ sub next_messageref {
             }
         }
 
-        last if $prev eq $/ && ($line =~ $self->_from_line_re);
+        if ($prev eq $/ && ($line =~ $self->_from_line_re)) {
+            $mail .= $prev;
+            $last = $line;
+            last;
+        }
 
         $mail .= $prev;
         $prev = $line;
@@ -222,6 +244,7 @@ sub next_messageref {
         $prev =~ s/^>(>*From )/$1/ if $self->{unescape};
     }
     print "$count end of message line $.\n" if debug;
+    $self->{from} = $last;
     return unless $mail;
     return \$mail;
 }
