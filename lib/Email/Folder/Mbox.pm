@@ -106,6 +106,10 @@ This returns the current filehandle position in the mbox.
 
 This returns the From_ line for next message. Call it before ->next_message.
 
+=item C<messageid>
+
+This returns the messageid of last read message. Call if after ->next_message.
+
 =back
 
 =cut
@@ -186,6 +190,8 @@ sub next_messageref {
 
     my $fh = $self->{_fh} || $self->_open_it;
     local $/ = $self->{eol};
+
+    $self->{messageid} = undef;
 
     my $mail = '';
     my $prev = '';
@@ -277,6 +283,10 @@ sub next_messageref {
             last;
         }
 
+        if ($inheaders && !defined $self->{messageid} && ($line =~ /^Message-Id:\s*(.+)/i)) {
+            $self->{messageid} = $1;
+        }
+
         $mail .= $prev;
         $prev = $line;
 
@@ -316,6 +326,11 @@ sub _from_line_re {
 sub tell {
     my $self = shift;
     return tell $self->{_fh};
+}
+
+sub messageid {
+    my $self = shift;
+    return $self->{messageid};
 }
 
 1;
