@@ -143,6 +143,7 @@ sub _open_it {
         seek $fh, $self->{seek_to}, 0;
     }
     else {
+        local $/ = $self->{eol};
         my $firstline = <$fh>;
         if ($firstline) {
             croak "$file is not an mbox file" unless $firstline =~ /^From /;
