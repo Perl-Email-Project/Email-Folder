@@ -13,7 +13,7 @@ use Test::More tests => 17 + 3 * keys %boxes;
 
 use_ok("Email::Folder");
 
-for my $box (keys %boxes) {
+for my $box (sort keys %boxes) {
   my $folder;
   ok(
     $folder = Email::Folder->new("t/mboxes/$box", eol => $boxes{$box}),
