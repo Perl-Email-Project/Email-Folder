@@ -1,6 +1,10 @@
 Revision history for Email-Folder
 
 {{$NEXT}}
+        - all the changes in this release contributed by Pali Rohár
+        - support for mboxcl and mboxcl2
+        - add ability to read from a filehandle
+        - add next_from and next_messageref methods
 
 0.858     2014-01-07 10:54:18-05:00 America/New_York
           typo fixes in docs (thanks, Florian Schlichting)

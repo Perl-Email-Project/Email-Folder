@@ -28,6 +28,11 @@ The new constructor takes extra options.
 
 =over
 
+=item C<fh>
+
+When filename is set to C<"FH"> than Email::Folder::Mbox will read mbox
+archive from filehandle C<fh> instead from disk file C<filename>.
+
 =item C<eol>
 
 This indicates what the line-ending style is to be.  The default is
@@ -69,14 +74,36 @@ In deference to this extract from L<http://www.jwz.org/doc/content-length.html>
 
 Defaults to false.
 
+=item C<unescape>
+
+This boolean value indicates whenever lines which starts with
+
+ /^>+From /
+
+should be unescaped (= removed leading '>' char). This is needed for
+mboxrd and mboxcl variants. But there is no way to detect for used mbox
+variant, so default value is false.
+
 =item C<seek_to>
 
 Seek to an offset when opening the mbox.  When used in combination with
 ->tell you may be able to resume reading, with a trailing wind.
 
+=item <next_message>
+
+This returns next message as string
+
+=item <next_messageref>
+
+This returns next message as ref to string
+
 =item C<tell>
 
 This returns the current filehandle position in the mbox.
+
+=item C<next_from>
+
+This returns the From_ line for next message. Call it before ->next_message.
 
 =back
 
@@ -89,23 +116,39 @@ sub defaults {
 sub _open_it {
     my $self = shift;
     my $file = $self->{_file};
+    my $fh = $self->{fh};
 
-    # sanity checking
-    croak "$file does not exist" unless (-e $file);
-    croak "$file is not a file"  unless (-f $file);
+    unless ($file eq "FH" and $fh) {
+        # sanity checking
+        croak "$file does not exist" unless (-e $file);
+        croak "$file is not a file"  unless (-f $file);
 
-    local $/ = $self->{eol};
-    my $fh = $self->_get_fh($file);
+        local $/ = $self->{eol};
+        $fh = $self->_get_fh($file);
+    }
+
+    if (seek $fh, tell($fh), 0) {
+        # Enable using seek only if $fh is seekable
+        $self->{seekable} = 1;
+    } else {
+        # Otherwise use cache for simulating backward seeks
+        $self->{cache} = [];
+    }
 
     if ($self->{seek_to}) {
+        unless ($self->{seekable}) {
+            croak "$file is not seekable but seek_to was set";
+        }
         # we were told to seek.  hope it all goes well
         seek $fh, $self->{seek_to}, 0;
     }
     else {
+        local $/ = $self->{eol};
         my $firstline = <$fh>;
         if ($firstline) {
             croak "$file is not an mbox file" unless $firstline =~ /^From /;
         }
+        $self->{from} = $firstline;
     }
 
     $self->{_fh} = $fh;
@@ -119,10 +162,25 @@ sub _get_fh {
     return $fh;
 }
 
+sub _read_nextline {
+    my $self = shift;
+    if (not $self->{seekable} and @{$self->{cache}}) {
+        return shift @{$self->{cache}};
+    }
+    my $fh = $self->{_fh};
+    return <$fh>;
+}
+
 use constant debug => 0;
 my $count;
 
-sub next_message {
+sub next_from {
+    my $self = shift;
+    $self->_open_it unless $self->{_fh};
+    return $self->{from};
+}
+
+sub next_messageref {
     my $self = shift;
 
     my $fh = $self->{_fh} || $self->_open_it;
@@ -130,64 +188,111 @@ sub next_message {
 
     my $mail = '';
     my $prev = '';
+    my $last;
     my $inheaders = 1;
     ++$count;
     print "$count starting scanning at line $.\n" if debug;
 
-    while (my $line = <$fh>) {
+    while (my $line = _read_nextline($self)) {
         if ($line eq $/ && $inheaders) { # end of headers
             print "$count end of headers at line $.\n" if debug;
             $inheaders = 0; # stop looking for the end of headers
-            my $pos = tell $fh; # where to go back to if it goes wrong
+            my $pos; # where to go back to if it goes wrong
+            $pos = tell $fh if $self->{seekable};
 
             # look for a content length header, and try to use that
-            if ($mail =~ m/^Content-Length: (\d+)$/mi) {
+            if ($mail =~ m/^Content-Length:\s*(\d+)$/mi) {
+                my @cache;
                 $mail .= $prev;
                 $prev = '';
                 my $length = $1;
                 print " Content-Length: $length\n" if debug;
                 my $read = '';
-                while (my $bodyline = <$fh>) {
+                while (my $bodyline = _read_nextline($self)) {
+                    push @cache, $bodyline unless $self->{seekable};
                     last if length $read >= $length;
+                    # unescape From_
+                    $bodyline =~ s/^>(>*From )/$1/ if $self->{unescape};
                     $read .= $bodyline;
                 }
                 # grab the next line (should be /^From / or undef)
-                my $next = <$fh>;
-                return "$mail$/$read"
-                  if !defined $next || $next =~ /^From /;
+                my $next = _read_nextline($self);
+                if (!defined $next || $next =~ /^From /) {
+                    $self->{from} = $next;
+                    $mail .= "$/$read";
+                    return \$mail;
+                }
+                push @cache, $next unless $self->{seekable};
                 # seek back and scan line-by-line like the header
                 # wasn't here
                 print " Content-Length assertion failed '$next'\n" if debug;
-                seek $fh, $pos, 0;
+                if ($self->{seekable}) {
+                    seek $fh, $pos, 0;
+                }
+                else {
+                    unshift @{$self->{cache}}, @cache;
+                }
             }
 
             # much the same, but with Lines:
-            if ($mail =~ m/^Lines: (\d+)$/mi) {
+            if ($mail =~ m/^Lines:\s*(\d+)$/mi) {
+                my @cache;
                 $mail .= $prev;
                 $prev = '';
                 my $lines = $1;
                 print " Lines: $lines\n" if debug;
                 my $read = '';
-                for (1 .. $lines) { $read .= <$fh> }
-                <$fh>; # trailing newline
-                my $next = <$fh>;
-                return "$mail$/$read"
-                  if !defined $next || $next =~ /^From /;
+                for (1 .. $lines) {
+                    my $bodyline = _read_nextline($self);
+                    last unless defined $bodyline;
+                    push @cache, $bodyline unless $self->{seekable};
+                    # unescape From_
+                    $bodyline =~ s/^>(>*From )/$1/ if $self->{unescape};
+                    $read .= $bodyline;
+                }
+                my $ign = _read_nextline($self); # trailing newline
+                my $next = _read_nextline($self);
+                if (!defined $next || $next =~ /^From /) {
+                    $self->{from} = $next;
+                    $mail .= "$/$read";
+                    return \$mail;
+                }
+                push @cache, $ign, $next unless $self->{seekable};
                 # seek back and scan line-by-line like the header
                 # wasn't here
                 print " Lines assertion failed '$next'\n" if debug;
-                seek $fh, $pos, 0;
+                if ($self->{seekable}) {
+                    seek $fh, $pos, 0;
+                }
+                else {
+                    unshift @{$self->{cache}}, @cache;
+                }
             }
         }
 
-        last if $prev eq $/ && ($line =~ $self->_from_line_re);
+        if ($prev eq $/ && ($line =~ $self->_from_line_re)) {
+            $mail .= $prev;
+            $last = $line;
+            last;
+        }
 
         $mail .= $prev;
         $prev = $line;
+
+        # unescape From_
+        $prev =~ s/^>(>*From )/$1/ if $self->{unescape};
     }
     print "$count end of message line $.\n" if debug;
+    $self->{from} = $last;
     return unless $mail;
-    return $mail;
+    return \$mail;
+}
+
+sub next_message {
+    my $self = shift;
+    my $ref = $self->next_messageref;
+    return unless $ref;
+    return ${$ref};
 }
 
 my @FROM_RE;
