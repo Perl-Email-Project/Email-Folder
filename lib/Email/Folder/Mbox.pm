@@ -2,6 +2,7 @@ use strict;
 use warnings;
 package Email::Folder::Mbox;
 # ABSTRACT: reads raw RFC822 mails from an mbox file
+
 use Carp;
 use IO::File;
 use Email::Folder::Reader;

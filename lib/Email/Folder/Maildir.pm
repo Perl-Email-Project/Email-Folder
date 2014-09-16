@@ -2,6 +2,7 @@ use strict;
 use warnings;
 package Email::Folder::Maildir;
 # ABSTRACT: reads raw RFC822 mails from a maildir
+
 use Carp;
 use IO::File;
 use Email::Folder::Reader;

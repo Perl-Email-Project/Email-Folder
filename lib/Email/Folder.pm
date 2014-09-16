@@ -1,7 +1,8 @@
 use strict;
 use warnings;
-# ABSTRACT: read all the messages from a folder as Email::Simple objects
 package Email::Folder;
+# ABSTRACT: read all the messages from a folder as Email::Simple objects
+
 use Carp;
 use Email::Simple;
 use Email::FolderType 0.6 qw/folder_type/;
