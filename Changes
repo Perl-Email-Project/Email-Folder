@@ -1,6 +1,8 @@
 Revision history for Email-Folder
 
 {{$NEXT}}
+
+0.859     2014-09-16 18:29:32-04:00 America/New_York
         - all the changes in this release contributed by Pali Rohár
         - support for mboxcl and mboxcl2
         - add ability to read from a filehandle
