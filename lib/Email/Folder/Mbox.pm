@@ -90,11 +90,11 @@ variant, so default value is false.
 Seek to an offset when opening the mbox.  When used in combination with
 ->tell you may be able to resume reading, with a trailing wind.
 
-=item <next_message>
+=item C<next_message>
 
 This returns next message as string
 
-=item <next_messageref>
+=item C<next_messageref>
 
 This returns next message as ref to string
 
